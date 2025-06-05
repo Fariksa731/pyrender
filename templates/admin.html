@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة التحكم</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>إضافة منتج</h1>
+  <input type="text" id="name" placeholder="اسم المنتج">
+  <input type="text" id="price" placeholder="السعر">
+  <input type="text" id="image" placeholder="رابط الصورة">
+  <button onclick="addProduct()">إضافة</button>
+
+  <h2>كل المنتجات</h2>
+  <div id="product-list"></div>
+
+  <script>
+    async function loadProducts() {
+      const res = await fetch("/api/products");
+      const data = await res.json();
+      const list = document.getElementById("product-list");
+      list.innerHTML = '';
+      data.forEach(p => {
+        list.innerHTML += `
+          <div class="admin-card">
+            <img src="${p.image}" width="100"><br>
+            <b>${p.name}</b><br>
+            <input value="${p.price}" id="price-${p.name}">
+            <button onclick="updateProduct('${p.name}')">تحديث</button>
+            <button onclick="deleteProduct('${p.name}')">حذف</button>
+          </div>
+        `;
+      });
+    }
+
+    async function addProduct() {
+      const name = document.getElementById("name").value;
+      const price = document.getElementById("price").value;
+      const image = document.getElementById("image").value;
+      await fetch("/api/products", {
+        method: "POST",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name, price, image })
+      });
+      loadProducts();
+    }
+
+    async function updateProduct(name) {
+      const price = document.getElementById("price-" + name).value;
+      await fetch("/api/products", {
+        method: "PUT",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name, price })
+      });
+      loadProducts();
+    }
+
+    async function deleteProduct(name) {
+      await fetch("/api/products", {
+        method: "DELETE",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name })
+      });
+      loadProducts();
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>
