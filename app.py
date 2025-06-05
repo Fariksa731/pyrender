@@ -7,9 +7,9 @@ app = Flask(__name__)
 CORS(app)
 
 # الاتصال بقاعدة البيانات (Atlas أو محلي)
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://127.0.0.1:27017")
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://Store:ihge2660@mystoreproject.udmwjft.mongodb.net/store?retryWrites=true&w=majority")
 client = MongoClient(MONGO_URI)
-db = client["myshop"]
+db = client["store"]
 collection = db["products"]
 
 @app.route('/')
