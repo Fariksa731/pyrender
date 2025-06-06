@@ -6,4 +6,4 @@ services:
     startCommand: gunicorn wsgi:app
     envVars:
       - key: MONGO_URI
-        value: mongodb+srv://...
+        value: mongodb+srv://Store:ihge2660@mystoreproject.udmwjft.mongodb.net/store?retryWrites=true&w=majority
