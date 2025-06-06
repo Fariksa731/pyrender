@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pymongo import MongoClient
 import os
@@ -6,42 +6,33 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# الاتصال بقاعدة البيانات (Atlas أو محلي)
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://Store:ihge2660@mystoreproject.udmwjft.mongodb.net/store?retryWrites=true&w=majority")
-client = MongoClient(MONGO_URI)
-db = client["store"]
-collection = db["products"]
+# الاتصال بقاعدة البيانات عبر متغير البيئة
+mongo_uri = os.environ.get("MONGO_URI")
+client = MongoClient(mongo_uri)
+db = client["store"]  # يمكنك تغييره لاسم قاعدة البيانات الفعلي
+collection = db["products"]  # مثال على مجموعة بيانات
 
-@app.route('/')
+# نقطة اختبار رئيسية
+@app.route("/")
 def home():
-    return render_template("index.html")
+    return jsonify({"message": "API is running on Render 🎉"})
 
-@app.route('/admin')
-def admin():
-    return render_template("admin.html")
-
-@app.route('/api/products', methods=['GET'])
-def get_products():
-    products = list(collection.find({}, {"_id": 0}))
-    return jsonify(products)
-
-@app.route('/api/products', methods=['POST'])
+# إضافة منتج (مثال)
+@app.route("/add", methods=["POST"])
 def add_product():
     data = request.json
+    if not data or "name" not in data:
+        return jsonify({"error": "Missing product data"}), 400
     collection.insert_one(data)
-    return jsonify({"msg": "تمت الإضافة"})
+    return jsonify({"message": "Product added successfully"}), 201
 
-@app.route('/api/products', methods=['PUT'])
-def update_product():
-    data = request.json
-    collection.update_one({"name": data['name']}, {"$set": data})
-    return jsonify({"msg": "تم التحديث"})
+# عرض كل المنتجات (مثال)
+@app.route("/products", methods=["GET"])
+def get_products():
+    products = list(collection.find({}, {"_id": 0}))  # تجاهل _id في الإخراج
+    return jsonify(products)
 
-@app.route('/api/products', methods=['DELETE'])
-def delete_product():
-    name = request.json['name']
-    collection.delete_one({"name": name})
-    return jsonify({"msg": "تم الحذف"})
-
-if __name__ == '__main__':
-    app.run(debug=True)
+# إعداد السيرفر للعمل على Render
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
