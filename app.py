@@ -26,6 +26,4 @@ def test_mongo():
     except Exception as e:
         return f"❌ MongoDB Error: {e}"
 
-# بدء التطبيق على 0.0.0.0 وليس localhost فقط
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+
